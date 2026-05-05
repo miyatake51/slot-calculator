@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#131310"/>
+      <stop offset="100%" stop-color="#090907"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- 外枠 -->
+  <rect x="14" y="14" width="484" height="484" rx="84" fill="none" stroke="#FFA020" stroke-width="3" opacity="0.25"/>
+
+  <!-- 上下のアクセントライン -->
+  <rect x="72" y="54" width="368" height="7" rx="3.5" fill="#FFA020" opacity="0.5"/>
+  <rect x="72" y="451" width="368" height="7" rx="3.5" fill="#FFA020" opacity="0.5"/>
+
+  <!-- "7" -->
+  <text x="258" y="390"
+        font-family="'Arial Black', 'Impact', 'Helvetica Neue', Arial, sans-serif"
+        font-size="320"
+        font-weight="900"
+        text-anchor="middle"
+        fill="#FFA020"
+        filter="url(#glow)">7</text>
+</svg>

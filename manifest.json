@@ -1,0 +1,17 @@
+{
+  "name": "パチスロ換金計算",
+  "short_name": "換金計算",
+  "description": "パチスロ出玉の換金額を計算します",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#FFA020",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
