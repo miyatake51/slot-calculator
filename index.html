@@ -420,16 +420,20 @@
 
     <div class="error-block" id="errorCard"></div>
 
-    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <button class="btn-calc" id="calcBtn">計算する</button>
 
   </div>
 
   <script>
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+
     function calculate() {
-      const medals = parseFloat(document.getElementById('medals').value);
+      const medalsInput = document.getElementById('medals').value;
+      const medals = parseFloat(medalsInput);
       const lending = parseFloat(document.getElementById('lending').value);
       const exchangeVal = document.getElementById('exchange').value;
-      const fee = parseFloat(document.getElementById('fee').value) || 0;
+      const feeRaw = parseFloat(document.getElementById('fee').value);
+      const fee = isNaN(feeRaw) ? 0 : feeRaw;
 
       const errorCard = document.getElementById('errorCard');
       const resultCard = document.getElementById('resultCard');
@@ -437,7 +441,7 @@
       errorCard.classList.remove('show');
       resultCard.classList.remove('show');
 
-      if (isNaN(medals) || document.getElementById('medals').value === '') {
+      if (medalsInput === '' || isNaN(medals)) {
         showError('出枚数を入力してください');
         return;
       }
@@ -445,26 +449,60 @@
         showError('出枚数は0以上の数字を入力してください');
         return;
       }
+      if (!Number.isInteger(medals)) {
+        showError('出枚数は整数で入力してください');
+        return;
+      }
+      if (fee < 0 || fee > 100) {
+        showError('換金手数料は0〜100%の範囲で入力してください');
+        return;
+      }
       if (exchangeVal === 'equal' && (isNaN(lending) || lending <= 0)) {
         showError('等価交換を選択した場合は「何枚貸し」も入力してください');
         return;
       }
 
+      // 等価交換 = 何枚貸しと同じレートで換金する
       const exchangeRate = exchangeVal === 'equal' ? lending : parseFloat(exchangeVal);
       const beforeFee = medals * (1000 / exchangeRate);
       const afterFee = Math.floor(beforeFee * (1 - fee / 100));
       const perCoin = (1000 / exchangeRate).toFixed(2);
 
-      document.getElementById('resultAmount').innerHTML =
-        '<span class="display-currency">¥</span>' + afterFee.toLocaleString();
+      // 結果表示（DOM操作でXSSを防ぐ）
+      const amountEl = document.getElementById('resultAmount');
+      amountEl.textContent = '';
+      const currencySpan = document.createElement('span');
+      currencySpan.className = 'display-currency';
+      currencySpan.textContent = '¥';
+      amountEl.appendChild(currencySpan);
+      amountEl.appendChild(document.createTextNode(afterFee.toLocaleString()));
 
-      document.getElementById('resultDetail').innerHTML =
-        '<div class="stat-item"><p class="stat-key">出枚数</p><p class="stat-val">' + Math.floor(medals).toLocaleString() + '枚</p></div>' +
-        '<div class="stat-item"><p class="stat-key">1枚あたり</p><p class="stat-val">' + perCoin + '円</p></div>' +
-        '<div class="stat-item"><p class="stat-key">手数料前</p><p class="stat-val">¥' + Math.floor(beforeFee).toLocaleString() + '</p></div>' +
-        '<div class="stat-item"><p class="stat-key">換金手数料</p><p class="stat-val">' + fee + '%</p></div>';
+      const detailEl = document.getElementById('resultDetail');
+      detailEl.textContent = '';
+      [
+        ['出枚数',     medals.toLocaleString() + '枚'],
+        ['1枚あたり',  perCoin + '円'],
+        ['手数料前',   '¥' + Math.floor(beforeFee).toLocaleString()],
+        ['換金手数料', fee + '%'],
+      ].forEach(function(pair) {
+        detailEl.appendChild(createStatItem(pair[0], pair[1]));
+      });
 
       resultCard.classList.add('show');
+    }
+
+    function createStatItem(key, val) {
+      const item = document.createElement('div');
+      item.className = 'stat-item';
+      const keyEl = document.createElement('p');
+      keyEl.className = 'stat-key';
+      keyEl.textContent = key;
+      const valEl = document.createElement('p');
+      valEl.className = 'stat-val';
+      valEl.textContent = val;
+      item.appendChild(keyEl);
+      item.appendChild(valEl);
+      return item;
     }
 
     function showError(message) {

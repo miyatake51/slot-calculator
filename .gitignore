@@ -1,5 +1,20 @@
+# 環境変数・秘密情報
 .env
 .env.*
-.DS_Store
+
+# Claude Code設定
+.claude/settings.local.json
+
+# 秘密鍵・証明書
 *.pem
 *.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# macOSシステムファイル
+.DS_Store
+
+# npmパッケージ（将来npm導入時に備えて）
+node_modules/
