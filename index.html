@@ -1020,72 +1020,75 @@
   </div>
 
   <script>
-    document.getElementById('calcBtn').addEventListener('click', calculate);
-    document.getElementById('saveBtn').addEventListener('click', saveRecord);
-    document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
-
-    // 台帳開閉トグル処理
-    const toggleLedgerBtn = document.getElementById('toggleLedgerBtn');
-    const ledgerPlate = document.querySelector('.ledger-plate');
-
-    toggleLedgerBtn.addEventListener('click', () => {
-      const isShown = ledgerPlate.classList.contains('show');
-      if (isShown) {
-        ledgerPlate.classList.remove('show');
-        toggleLedgerBtn.textContent = 'Show Ledger';
-      } else {
-        ledgerPlate.classList.add('show');
-        toggleLedgerBtn.textContent = 'Hide Ledger';
-      }
-    });
-    
-    // タブ切り替えロジック
-    const tabHistoryBtn = document.getElementById('tabHistoryBtn');
-    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
-    const historyContent = document.getElementById('historyContent');
-    const calendarContent = document.getElementById('calendarContent');
-
-    tabHistoryBtn.addEventListener('click', () => {
-      tabHistoryBtn.classList.add('active');
-      tabCalendarBtn.classList.remove('active');
-      historyContent.classList.add('active');
-      calendarContent.classList.remove('active');
-    });
-
-    tabCalendarBtn.addEventListener('click', () => {
-      tabCalendarBtn.classList.add('active');
-      tabHistoryBtn.classList.remove('active');
-      calendarContent.classList.add('active');
-      historyContent.classList.remove('active');
-    });
-
-    // カレンダーのナビゲーション
-    document.getElementById('prevMonthBtn').addEventListener('click', () => {
-      calendarMonth--;
-      if (calendarMonth < 0) {
-        calendarMonth = 11;
-        calendarYear--;
-      }
-      renderCalendar();
-    });
-    document.getElementById('nextMonthBtn').addEventListener('click', () => {
-      calendarMonth++;
-      if (calendarMonth > 11) {
-        calendarMonth = 0;
-        calendarYear++;
-      }
-      renderCalendar();
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadHistory();
-      renderCalendar();
-    });
-
+    // ─── 状態変数 ───
     let currentCalculation = null;
     let calendarYear = new Date().getFullYear();
     let calendarMonth = new Date().getMonth();
 
+    // ─── ストレージ（読み書きをここに集約） ───
+    function getHistory() {
+      try {
+        const json = localStorage.getItem('slot_calculator_history');
+        return json ? JSON.parse(json) : [];
+      } catch (e) {
+        console.warn('履歴データの読み込みに失敗しました', e);
+        return [];
+      }
+    }
+
+    function setHistory(history) {
+      try {
+        localStorage.setItem('slot_calculator_history', JSON.stringify(history));
+        return true;
+      } catch (e) {
+        console.warn('履歴データの保存に失敗しました', e);
+        return false;
+      }
+    }
+
+    // ─── 日付 ───
+    function getFormattedDate(now) {
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      return `${y}/${m}/${d} ${h}:${min}`;
+    }
+
+    function getDateKey(now) {
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function resolveDateKey(record) {
+      return record.dateKey || record.date.split(' ')[0].replace(/\//g, '-');
+    }
+
+    // ─── UI部品 ───
+    function createStatItem(key, val) {
+      const item = document.createElement('div');
+      item.className = 'stat-item';
+      const keyEl = document.createElement('p');
+      keyEl.className = 'stat-key';
+      keyEl.textContent = key;
+      const valEl = document.createElement('p');
+      valEl.className = 'stat-val';
+      valEl.textContent = val;
+      item.appendChild(keyEl);
+      item.appendChild(valEl);
+      return item;
+    }
+
+    function showError(message) {
+      const errorCard = document.getElementById('errorCard');
+      errorCard.textContent = message;
+      errorCard.classList.add('show');
+    }
+
+    // ─── 計算 ───
     function calculate() {
       const medalsInput = document.getElementById('medals').value;
       const medals = parseFloat(medalsInput);
@@ -1127,14 +1130,16 @@
         return;
       }
 
-      // 等価交換 = 何枚貸しと同じレートで換金する
       const exchangeRate = exchangeVal === 'equal' ? lending : parseFloat(exchangeVal);
+      if (!isFinite(exchangeRate) || exchangeRate <= 0) {
+        showError('交換レートが正しくありません');
+        return;
+      }
       const beforeFee = medals * (1000 / exchangeRate);
-      const afterFee = Math.floor(beforeFee * (1 - fee / 100));
+      const afterFee = Math.floor(beforeFee * (1 - fee / 100)); // 1円未満切り捨て
       const perCoin = (1000 / exchangeRate).toFixed(2);
       const netProfit = afterFee - investment;
 
-      // 結果表示
       const amountEl = document.getElementById('resultAmount');
       amountEl.textContent = '';
       const currencySpan = document.createElement('span');
@@ -1143,7 +1148,6 @@
       amountEl.appendChild(currencySpan);
       amountEl.appendChild(document.createTextNode(afterFee.toLocaleString()));
 
-      // 純収支の表示
       const profitEl = document.getElementById('resultProfit');
       profitEl.textContent = '';
       profitEl.className = 'display-amount ' + (netProfit >= 0 ? 'profit-plus' : 'profit-minus');
@@ -1165,17 +1169,17 @@
         detailEl.appendChild(createStatItem(pair[0], pair[1]));
       });
 
-      // 保存用に結果を格納
+      const now = new Date();
       currentCalculation = {
-        id: Date.now(),
-        date: getFormattedDate(),
+        id: crypto.randomUUID(),
+        date: getFormattedDate(now),
+        dateKey: getDateKey(now), // カレンダー集計・履歴連動用
         medals: medals,
         investment: investment,
         afterFee: afterFee,
         netProfit: netProfit
       };
 
-      // 保存ボタンのリセット
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.textContent = '結果を記録する (Save Record)';
       saveBtn.style.borderColor = 'var(--gold-dim)';
@@ -1185,40 +1189,9 @@
       resultCard.classList.add('show');
     }
 
-    function createStatItem(key, val) {
-      const item = document.createElement('div');
-      item.className = 'stat-item';
-      const keyEl = document.createElement('p');
-      keyEl.className = 'stat-key';
-      keyEl.textContent = key;
-      const valEl = document.createElement('p');
-      valEl.className = 'stat-val';
-      valEl.textContent = val;
-      item.appendChild(keyEl);
-      item.appendChild(valEl);
-      return item;
-    }
-
-    function showError(message) {
-      const errorCard = document.getElementById('errorCard');
-      errorCard.textContent = message;
-      errorCard.classList.add('show');
-    }
-
-    function getFormattedDate() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      const h = String(now.getHours()).padStart(2, '0');
-      const min = String(now.getMinutes()).padStart(2, '0');
-      return `${y}/${m}/${d} ${h}:${min}`;
-    }
-
+    // ─── 履歴 ───
     function loadHistory() {
-      const historyJSON = localStorage.getItem('slot_calculator_history');
-      const history = historyJSON ? JSON.parse(historyJSON) : [];
-      renderHistory(history);
+      renderHistory(getHistory());
     }
 
     function renderHistory(history) {
@@ -1240,11 +1213,11 @@
 
       history.slice().reverse().forEach(record => {
         const tr = document.createElement('tr');
-        const datePart = record.date.split(' ')[0].replace(/\//g, '-');
-        tr.setAttribute('data-date', datePart);
+        const dateKey = resolveDateKey(record);
+        tr.setAttribute('data-date', dateKey);
 
         const tdDate = document.createElement('td');
-        const shortDate = record.date.substring(5);
+        const shortDate = record.date.substring(5); // "YYYY/" の5文字を除いて "MM/DD HH:mm" を取得
         tdDate.textContent = shortDate;
         tr.appendChild(tdDate);
 
@@ -1282,12 +1255,18 @@
 
     function saveRecord() {
       if (!currentCalculation) return;
+      const toSave = currentCalculation;
+      currentCalculation = null; // 先にクリアして二重保存を防ぐ
 
-      const historyJSON = localStorage.getItem('slot_calculator_history');
-      const history = historyJSON ? JSON.parse(historyJSON) : [];
+      const history = getHistory();
+      history.push(toSave);
+      const saved = setHistory(history);
 
-      history.push(currentCalculation);
-      localStorage.setItem('slot_calculator_history', JSON.stringify(history));
+      if (!saved) {
+        currentCalculation = toSave; // 保存失敗時は復元して再保存できる状態を維持
+        showError('保存に失敗しました。ストレージ容量を確認してください');
+        return;
+      }
 
       renderHistory(history);
       renderCalendar();
@@ -1298,7 +1277,6 @@
       saveBtn.style.color = '#6ef089';
       saveBtn.disabled = true;
 
-      // 保存完了時に台帳が閉じていれば自動展開する
       if (!ledgerPlate.classList.contains('show')) {
         ledgerPlate.classList.add('show');
         toggleLedgerBtn.textContent = 'Hide Ledger';
@@ -1306,13 +1284,10 @@
     }
 
     function deleteRecord(id) {
-      const historyJSON = localStorage.getItem('slot_calculator_history');
-      if (!historyJSON) return;
-
-      let history = JSON.parse(historyJSON);
+      if (!confirm('この記録を削除してもよろしいですか？')) return;
+      let history = getHistory();
       history = history.filter(record => record.id !== id);
-      localStorage.setItem('slot_calculator_history', JSON.stringify(history));
-
+      setHistory(history);
       renderHistory(history);
       renderCalendar();
     }
@@ -1325,22 +1300,18 @@
       }
     }
 
-    // カレンダー用の日付別集計
+    // ─── カレンダー ───
     function getDailyProfits() {
-      const historyJSON = localStorage.getItem('slot_calculator_history');
-      const history = historyJSON ? JSON.parse(historyJSON) : [];
+      const history = getHistory();
       const daily = {};
       history.forEach(record => {
-        const datePart = record.date.split(' ')[0].replace(/\//g, '-');
-        if (!daily[datePart]) {
-          daily[datePart] = 0;
-        }
-        daily[datePart] += record.netProfit;
+        const key = resolveDateKey(record);
+        if (!daily[key]) daily[key] = 0;
+        daily[key] += record.netProfit;
       });
       return daily;
     }
 
-    // カレンダーの描画
     function renderCalendar() {
       const label = document.getElementById('calendarMonthLabel');
       label.textContent = `${calendarYear}年${calendarMonth + 1}月`;
@@ -1357,14 +1328,12 @@
       const dailyProfits = getDailyProfits();
       const today = new Date();
 
-      // 空白セル
       for (let i = 0; i < startDayOfWeek; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-day empty';
         daysContainer.appendChild(emptyCell);
       }
 
-      // 日付セル
       for (let d = 1; d <= numDays; d++) {
         const cell = document.createElement('div');
         cell.className = 'calendar-day';
@@ -1409,23 +1378,80 @@
       }
     }
 
-    // 履歴行の強調連動
     function highlightHistoryForDate(dateKey) {
-      // カレンダーの日付クリック時は、Historyタブへ自動切り替え
       document.getElementById('tabHistoryBtn').click();
 
       const rows = document.querySelectorAll('#historyBody tr');
       rows.forEach(row => row.classList.remove('highlighted'));
 
-      const targetRows = document.querySelectorAll(`#historyBody tr[data-date="${dateKey}"]`);
+      const allRows = document.querySelectorAll('#historyBody tr[data-date]');
+      const targetRows = Array.from(allRows).filter(row => row.getAttribute('data-date') === dateKey);
       if (targetRows.length > 0) {
         targetRows.forEach(row => row.classList.add('highlighted'));
-        // タブ切り替えアニメーション（fadeIn等）により要素が表示されるのを待ってからスクロールを実行
         setTimeout(() => {
           targetRows[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+        }, 100); // fadeInアニメーション完了を待つため
       }
     }
+
+    // ─── DOM初期化（関数定義の後に配置） ───
+    const toggleLedgerBtn = document.getElementById('toggleLedgerBtn');
+    const ledgerPlate = document.querySelector('.ledger-plate');
+    const tabHistoryBtn = document.getElementById('tabHistoryBtn');
+    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+    const historyContent = document.getElementById('historyContent');
+    const calendarContent = document.getElementById('calendarContent');
+
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+    document.getElementById('saveBtn').addEventListener('click', saveRecord);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+    toggleLedgerBtn.addEventListener('click', () => {
+      const isShown = ledgerPlate.classList.contains('show');
+      if (isShown) {
+        ledgerPlate.classList.remove('show');
+        toggleLedgerBtn.textContent = 'Show Ledger';
+      } else {
+        ledgerPlate.classList.add('show');
+        toggleLedgerBtn.textContent = 'Hide Ledger';
+      }
+    });
+
+    tabHistoryBtn.addEventListener('click', () => {
+      tabHistoryBtn.classList.add('active');
+      tabCalendarBtn.classList.remove('active');
+      historyContent.classList.add('active');
+      calendarContent.classList.remove('active');
+    });
+
+    tabCalendarBtn.addEventListener('click', () => {
+      tabCalendarBtn.classList.add('active');
+      tabHistoryBtn.classList.remove('active');
+      calendarContent.classList.add('active');
+      historyContent.classList.remove('active');
+    });
+
+    document.getElementById('prevMonthBtn').addEventListener('click', () => {
+      calendarMonth--;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      }
+      renderCalendar();
+    });
+
+    document.getElementById('nextMonthBtn').addEventListener('click', () => {
+      calendarMonth++;
+      if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderCalendar();
+    });
+
+    // ─── 初期描画 ───
+    loadHistory();
+    renderCalendar();
   </script>
 </body>
 </html>
