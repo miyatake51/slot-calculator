@@ -3,93 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>パチスロ換金計算</title>
+  <title>Calculator</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FFA020">
+  <meta name="theme-color" content="#141928">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="換金計算">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400;500&family=Cormorant+SC:wght@300;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --amber:        #FFA020;
-      --amber-bright: #FFD060;
-      --amber-dim:    #C47800;
-      --amber-glow:   rgba(255, 160, 32, 0.22);
-      --amber-trace:  rgba(255, 160, 32, 0.07);
-      --bg:           #080807;
-      --panel:        #0f0f0c;
-      --panel-2:      #131310;
-      --border:       #222220;
-      --border-glow:  rgba(255, 160, 32, 0.2);
-      --text:         #EDE8D8;
-      --text-mid:     rgba(237, 232, 216, 0.55);
-      --text-dim:     rgba(237, 232, 216, 0.28);
+      --bg: #ede8df;
+      --body: #141928;
+      --body-light: #1e2640;
+      --display-bg: #0a0e1a;
+      --gold: #c8a84b;
+      --gold-light: #e2c97e;
+      --gold-dim: rgba(200, 168, 75, 0.4);
+      --btn-num: #1c2338;
+      --btn-num-hover: #242e48;
+      --btn-op: #c8a84b;
+      --btn-op-hover: #d9bb60;
+      --btn-fn: #2a3050;
+      --btn-fn-hover: #333b60;
+      --text-num: #d8d0c4;
+      --text-fn: #9ba8c0;
+      --radius: 4px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+      font-family: 'Cormorant SC', "Noto Sans JP", "Hiragino Sans", sans-serif;
       background-color: var(--bg);
-      background-image:
-        radial-gradient(circle, rgba(255,160,32,0.055) 1px, transparent 1px);
-      background-size: 22px 22px;
-      color: var(--text);
+      color: var(--text-num);
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200, 168, 75, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 168, 75, 0.04) 1px, transparent 1px),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a84b' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-size: 20px 20px, 60px 60px;
+      pointer-events: none;
+      opacity: 0.8;
     }
 
     .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 52px 20px 88px;
+      width: 100%;
+      max-width: 400px;
+      animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(24px);
     }
 
-    /* ───── Header ───── */
-    .header {
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───── Header / Brand ───── */
+    .brand {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
     }
 
-    .header-eyebrow {
-      font-family: "Orbitron", monospace;
-      font-size: 9px;
-      font-weight: 400;
-      letter-spacing: 0.35em;
-      color: var(--amber);
-      opacity: 0.65;
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 0.78rem;
+      letter-spacing: 0.55em;
+      color: #8a7a5a;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
-    .header h1 {
+    .brand h1 {
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
       font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--text);
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--gold-light);
+      text-shadow: 0 0 10px rgba(200, 168, 75, 0.2);
     }
 
-    .header-rule {
-      width: 48px;
+    .brand-rule {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .brand-rule::before,
+    .brand-rule::after {
+      content: '';
+      flex: 1;
       height: 1px;
-      margin: 12px auto 0;
-      background: linear-gradient(90deg, transparent, var(--amber), transparent);
-      opacity: 0.5;
+      background: linear-gradient(90deg, transparent, var(--gold-dim));
     }
 
-    /* ───── Result Display ───── */
+    .brand-rule::after {
+      background: linear-gradient(90deg, var(--gold-dim), transparent);
+    }
+
+    .brand-diamond {
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      opacity: 0.6;
+    }
+
+    /* ───── 電卓筐体 ───── */
+    .calc {
+      background: var(--body);
+      border-radius: 12px;
+      padding: 32px 24px 24px;
+      box-shadow:
+        0 2px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 0 rgba(0,0,0,0.4) inset,
+        0 40px 80px rgba(14,18,30,0.45),
+        0 8px 24px rgba(14,18,30,0.3),
+        0 2px 6px rgba(14,18,30,0.2);
+      position: relative;
+      border: 1px solid rgba(200, 168, 75, 0.15);
+    }
+
+    /* ネジの装飾 */
+    .calc::before,
+    .calc::after,
+    .screw-bl,
+    .screw-br {
+      content: '';
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #2a3250, #0d1020);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .calc::before { top: 12px; left: 12px; }
+    .calc::after  { top: 12px; right: 12px; }
+    .screw-bl { bottom: 12px; left: 12px; }
+    .screw-br { bottom: 12px; right: 12px; }
+
+    .calc-label {
+      text-align: center;
+      font-family: 'Cormorant SC', serif;
+      font-weight: 300;
+      font-size: 0.58rem;
+      letter-spacing: 0.5em;
+      color: rgba(150,160,190,0.35);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    /* ───── Result Display (結果表示) ───── */
     .result-block {
       display: none;
-      margin-bottom: 14px;
+      margin-bottom: 20px;
     }
 
     .result-block.show {
       display: block;
-      animation: slideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes slideDown {
@@ -98,148 +186,154 @@
     }
 
     .display-frame {
-      background: #090907;
-      border: 1px solid var(--border-glow);
-      border-radius: 16px;
-      padding: 32px 24px 24px;
+      background: var(--display-bg);
+      border-radius: var(--radius);
+      padding: 16px 20px;
       position: relative;
+      overflow: hidden;
       box-shadow:
-        inset 0 0 48px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(255,160,32,0.06),
-        0 12px 40px rgba(0,0,0,0.7);
+        inset 0 2px 8px rgba(0,0,0,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 1px 0 rgba(255,255,255,0.06);
     }
 
-    .display-frame::before {
-      content: 'PAYOUT';
+    /* スキャンライン効果 */
+    .display-frame::after {
+      content: '';
       position: absolute;
-      top: -1px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--bg);
-      font-family: "Orbitron", monospace;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      color: var(--amber);
-      padding: 0 14px;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.12) 2px,
+        rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+      border-radius: var(--radius);
     }
 
     .display-label {
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      text-align: center;
-      margin-bottom: 14px;
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--text-fn);
+      margin-bottom: 8px;
+      opacity: 0.7;
     }
 
     .display-amount-wrap {
-      text-align: center;
-      margin-bottom: 8px;
+      text-align: right;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
     }
 
     .display-amount {
-      font-family: "Orbitron", monospace;
-      font-weight: 900;
-      font-size: 54px;
-      color: var(--amber);
-      letter-spacing: -0.02em;
-      line-height: 1;
-      text-shadow:
-        0 0 16px rgba(255,160,32,0.9),
-        0 0 48px rgba(255,160,32,0.4),
-        0 0 96px rgba(255,160,32,0.15);
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      font-size: 2.2rem;
+      color: var(--gold-light);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      text-shadow: 0 0 20px rgba(200,168,75,0.3);
     }
 
     .display-currency {
-      font-family: "Orbitron", monospace;
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--amber);
-      opacity: 0.65;
-      margin-right: 5px;
-      vertical-align: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--gold-light);
+      opacity: 0.7;
+      margin-right: 6px;
     }
 
-    /* Stats grid */
+    /* 詳細項目グリッド */
     .display-stats {
-      border-top: 1px solid rgba(255,160,32,0.1);
-      padding-top: 18px;
-      margin-top: 22px;
+      border-top: 1px solid rgba(200, 168, 75, 0.15);
+      padding-top: 12px;
+      margin-top: 12px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
     }
 
     .stat-item {
-      background: var(--amber-trace);
-      border: 1px solid rgba(255,160,32,0.09);
-      border-radius: 9px;
-      padding: 10px 13px;
+      background: rgba(200, 168, 75, 0.03);
+      border: 1px solid rgba(200, 168, 75, 0.1);
+      border-radius: var(--radius);
+      padding: 8px 12px;
     }
 
     .stat-key {
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
       font-size: 9px;
       font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,160,32,0.55);
-      margin-bottom: 5px;
+      letter-spacing: 0.1em;
+      color: var(--text-fn);
+      opacity: 0.6;
+      margin-bottom: 3px;
     }
 
     .stat-val {
-      font-family: "Orbitron", monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.03em;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-num);
+      letter-spacing: 0.02em;
     }
 
-    /* ───── Input Panel ───── */
+    /* ───── 入力パネル ───── */
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      background: transparent;
+      margin-bottom: 16px;
     }
 
     .field {
-      padding: 17px 20px;
-      border-bottom: 1px solid #1c1c18;
+      background: var(--body-light);
+      border: 1px solid rgba(200, 168, 75, 0.15);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 12px;
       position: relative;
-      transition: background 0.12s;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    .field:last-child { border-bottom: none; }
+    .field:last-child { margin-bottom: 0; }
 
     .field:focus-within {
-      background: rgba(255, 160, 32, 0.025);
+      background: rgba(30, 38, 64, 0.8);
+      border-color: var(--gold);
     }
 
+    /* フォーカス時のインジケータ */
     .field-indicator {
       position: absolute;
       left: 0; top: 0; bottom: 0;
       width: 0;
-      background: var(--amber);
-      border-radius: 0 2px 2px 0;
-      transition: width 0.15s;
+      background: var(--gold-light);
+      border-radius: var(--radius) 0 0 var(--radius);
+      transition: width 0.15s ease;
+      box-shadow: 0 0 8px var(--gold);
     }
 
     .field:focus-within .field-indicator {
-      width: 2px;
+      width: 3px;
     }
 
     label {
       display: block;
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
       font-size: 10px;
       font-weight: 500;
       letter-spacing: 0.12em;
+      color: var(--text-fn);
+      margin-bottom: 6px;
       text-transform: uppercase;
-      color: var(--text-mid);
-      margin-bottom: 9px;
     }
 
     .input-row {
@@ -252,10 +346,10 @@
       background: transparent;
       border: none;
       outline: none;
-      font-family: "Orbitron", monospace;
-      font-size: 23px;
-      font-weight: 700;
-      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-num);
       -moz-appearance: textfield;
       padding: 0;
       width: 100%;
@@ -264,9 +358,9 @@
 
     input[type="number"]::placeholder {
       font-family: "Noto Sans JP", sans-serif;
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 300;
-      color: var(--text-dim);
+      color: rgba(155, 168, 192, 0.35);
     }
 
     input[type="number"]::-webkit-inner-spin-button,
@@ -275,10 +369,12 @@
     }
 
     .unit {
-      font-size: 12px;
-      font-weight: 300;
-      color: var(--text-dim);
-      margin-left: 10px;
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-fn);
+      opacity: 0.7;
+      margin-left: 8px;
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -289,154 +385,712 @@
       border: none;
       outline: none;
       font-family: "Noto Sans JP", sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-num);
       appearance: none;
       -webkit-appearance: none;
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='rgba(255,160,32,0.55)' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23c8a84b' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 2px center;
       padding-right: 24px;
     }
 
     select option {
-      background: #111;
-      color: #fff;
-      font-size: 15px;
+      background: var(--body);
+      color: var(--text-num);
+      font-size: 14px;
     }
 
     .hint {
-      font-size: 11px;
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: 10px;
       font-weight: 300;
-      color: var(--text-dim);
-      margin-top: 7px;
+      color: var(--text-fn);
+      opacity: 0.5;
+      margin-top: 5px;
       letter-spacing: 0.02em;
     }
 
-    /* ───── Button ───── */
+    /* ───── 計算ボタン (立体的な真鍮ゴールド押しボタン) ───── */
     .btn-calc {
       display: block;
       width: 100%;
-      padding: 20px;
-      background: var(--amber);
-      color: #0a0807;
-      font-family: "Orbitron", monospace;
+      padding: 16px;
+      background: var(--gold);
+      color: var(--body);
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
       font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.2em;
+      font-weight: 600;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       border: none;
-      border-radius: 14px;
+      border-radius: var(--radius);
       cursor: pointer;
-      margin-bottom: 12px;
-      transition: all 0.12s;
+      margin-bottom: 16px;
+      position: relative;
+      user-select: none;
+      outline: none;
       box-shadow:
-        0 4px 24px rgba(255,160,32,0.35),
-        0 1px 0 rgba(255,220,100,0.4) inset;
+        0 4px 0 #8a6820,
+        0 6px 16px rgba(200,168,75,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+    }
+
+    .btn-calc:hover {
+      background: var(--btn-op-hover);
+      box-shadow:
+        0 4px 0 #9a7828,
+        0 8px 20px rgba(200,168,75,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.3);
     }
 
     .btn-calc:active {
-      transform: scale(0.975);
-      box-shadow: 0 2px 10px rgba(255,160,32,0.2);
+      transform: translateY(4px);
+      box-shadow: none !important;
     }
 
-    /* ───── Error ───── */
+    /* ───── エラー ───── */
     .error-block {
       display: none;
-      background: rgba(239,68,68,0.07);
-      border: 1px solid rgba(239,68,68,0.18);
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 13px;
-      color: #fca5a5;
-      margin-bottom: 12px;
+      background: rgba(220, 50, 50, 0.07);
+      border: 1px solid rgba(220, 50, 50, 0.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: 12px;
+      color: #ff9999;
+      margin-bottom: 16px;
+      text-align: center;
+      box-shadow: inset 0 0 8px rgba(220,50,50,0.1);
     }
 
     .error-block.show { display: block; }
+
+    /* ───── シリアルナンバー刻印 ───── */
+    .serial {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      color: rgba(150,160,190,0.2);
+    }
+
+    /* ───── 純収支の光るエフェクト ───── */
+    .profit-plus {
+      color: #6ef089 !important;
+      text-shadow: 0 0 10px rgba(110, 240, 137, 0.6), 0 0 20px rgba(110, 240, 137, 0.3) !important;
+    }
+    .profit-minus {
+      color: #ff5533 !important;
+      text-shadow: 0 0 10px rgba(255, 85, 51, 0.6), 0 0 20px rgba(255, 85, 51, 0.3) !important;
+    }
+
+    /* ───── 履歴保存ボタン ───── */
+    .btn-save {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 16px;
+      background: transparent;
+      color: var(--gold-light);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      outline: none;
+    }
+    .btn-save:hover {
+      background: rgba(200, 168, 75, 0.1);
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(200, 168, 75, 0.2);
+    }
+    .btn-save:active {
+      transform: scale(0.98);
+    }
+
+    /* ───── 統合台帳プレート ───── */
+    .ledger-plate {
+      display: none; /* 初期は非表示 */
+      background: var(--body);
+      border-radius: 12px;
+      padding: 32px 24px 24px;
+      margin-top: 24px;
+      position: relative;
+      border: 1px solid rgba(200, 168, 75, 0.15);
+      box-shadow:
+        0 2px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 0 rgba(0,0,0,0.4) inset,
+        0 40px 80px rgba(14,18,30,0.45),
+        0 8px 24px rgba(14,18,30,0.3),
+        0 2px 6px rgba(14,18,30,0.2);
+    }
+    .ledger-plate::before, .ledger-plate::after, .ledger-plate .screw-bl, .ledger-plate .screw-br {
+      content: '';
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #2a3250, #0d1020);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .ledger-plate::before { top: 12px; left: 12px; }
+    .ledger-plate::after  { top: 12px; right: 12px; }
+    .ledger-plate .screw-bl { bottom: 12px; left: 12px; }
+    .ledger-plate .screw-br { bottom: 12px; right: 12px; }
+
+    /* ───── タブ切り替えボタン ───── */
+    .ledger-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.15);
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      background: rgba(14, 18, 30, 0.6);
+      color: rgba(155, 168, 192, 0.4);
+      border: 1px solid rgba(200, 168, 75, 0.1);
+      border-radius: var(--radius);
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-transform: uppercase;
+      outline: none;
+      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab-btn:hover {
+      color: var(--gold-light);
+      background: rgba(20, 25, 40, 0.8);
+      border-color: rgba(200, 168, 75, 0.3);
+    }
+
+    .tab-btn.active {
+      background: var(--btn-num);
+      color: var(--gold-light);
+      border-color: var(--gold);
+      box-shadow:
+        0 0 10px rgba(200, 168, 75, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      text-shadow: 0 0 8px rgba(200, 168, 75, 0.4);
+    }
+
+    /* コンテンツの表示非表示 */
+    .ledger-content {
+      display: none;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ledger-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .plate-title {
+      text-align: center;
+      font-family: 'Cormorant SC', serif;
+      font-weight: 300;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      text-shadow: 0 0 8px rgba(200, 168, 75, 0.2);
+    }
+
+    /* ───── 収支履歴 ───── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-bottom: 16px;
+      border: 1px solid rgba(200, 168, 75, 0.1);
+      border-radius: var(--radius);
+      background: var(--display-bg);
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      text-align: left;
+    }
+    .history-table th, .history-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.08);
+      white-space: nowrap;
+    }
+    .history-table th {
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--text-fn);
+      letter-spacing: 0.05em;
+      background: rgba(200, 168, 75, 0.03);
+      border-bottom: 1px solid rgba(200, 168, 75, 0.15);
+    }
+    .history-table td {
+      color: var(--text-num);
+    }
+    .history-table tr:last-child td {
+      border-bottom: none;
+    } 
+    .history-table tr.highlighted {
+      background: rgba(200, 168, 75, 0.15) !important;
+      outline: 1px solid var(--gold);
+      transition: background-color 0.3s ease;
+    }
+    .history-table .col-profit {
+      font-weight: 500;
+    }
+    .history-table .col-profit.plus {
+      color: #6ef089;
+    }
+    .history-table .col-profit.minus {
+      color: #ff5533;
+    }
+
+    .btn-row-del {
+      background: transparent;
+      border: none;
+      color: rgba(220, 50, 50, 0.6);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0 4px;
+      transition: color 0.15s ease;
+    }
+    .btn-row-del:hover {
+      color: #ff5533;
+    }
+
+    .history-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-clear {
+      padding: 8px 16px;
+      background: #8a2020;
+      color: #ffd8d8;
+      border: 1px solid #b33636;
+      border-radius: var(--radius);
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      box-shadow:
+        0 2px 0 #5c1414,
+        inset 0 1px 0 rgba(255,255,255,0.15);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+    }
+    .btn-clear:hover {
+      background: #a32c2c;
+      box-shadow:
+        0 2px 0 #6e1a1a,
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .btn-clear:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    /* ───── 収支カレンダー ───── */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 8px;
+    }
+    .calendar-month-label {
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gold-light);
+      letter-spacing: 0.1em;
+    }
+    .btn-cal-nav {
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-light);
+      border-radius: var(--radius);
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.2s ease;
+    }
+    .btn-cal-nav:hover {
+      background: rgba(200, 168, 75, 0.1);
+      border-color: var(--gold);
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .weekday {
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 9px;
+      color: var(--text-fn);
+      opacity: 0.6;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(200, 168, 75, 0.15);
+    }
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .calendar-day {
+      background: rgba(200, 168, 75, 0.02);
+      border: 1px solid rgba(200, 168, 75, 0.05);
+      border-radius: var(--radius);
+      aspect-ratio: 1;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .calendar-day:hover {
+      background: rgba(200, 168, 75, 0.08);
+      border-color: var(--gold-dim);
+    }
+    .calendar-day.empty {
+      background: transparent;
+      border-color: transparent;
+      cursor: default;
+      pointer-events: none;
+    }
+    .calendar-day.today {
+      border-color: var(--gold);
+      background: rgba(200, 168, 75, 0.05);
+    }
+    .calendar-day-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-num);
+      text-align: left;
+    }
+    .calendar-day-profit {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      text-align: right;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .calendar-day-profit.plus {
+      color: #6ef089;
+      text-shadow: 0 0 4px rgba(110, 240, 137, 0.4);
+    }
+    .calendar-day-profit.minus {
+      color: #ff5533;
+      text-shadow: 0 0 4px rgba(255, 85, 51, 0.4);
+    }
+
+    /* ───── 台帳開閉トグルボタン ───── */
+    .btn-toggle-ledger {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      background: var(--body);
+      color: var(--gold-light);
+      border: 1px solid var(--gold-dim);
+      border-radius: var(--radius);
+      font-family: 'Cormorant SC', "Noto Sans JP", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: center;
+      outline: none;
+      box-shadow:
+        0 2px 4px rgba(14,18,30,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .btn-toggle-ledger:hover {
+      background: rgba(200, 168, 75, 0.1);
+      border-color: var(--gold);
+      box-shadow: 
+        0 0 12px rgba(200, 168, 75, 0.25),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .btn-toggle-ledger:active {
+      transform: scale(0.98);
+    }
+
+    /* ───── 台帳プレート表示・非表示アニメーション ───── */
+    .ledger-plate.show {
+      display: block;
+      animation: fadeInLedger 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInLedger {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <div class="header">
-      <p class="header-eyebrow">Pachislot</p>
-      <h1>換金計算</h1>
-      <div class="header-rule"></div>
+    <div class="brand">
+      <p class="brand-name">Precision Instruments</p>
+      <h1>Calculator</h1>
+      <div class="brand-rule"><div class="brand-diamond"></div></div>
     </div>
 
-    <!-- Result Display -->
-    <div class="result-block" id="resultCard">
-      <div class="display-frame">
-        <p class="display-label">換金後の受取金額</p>
-        <div class="display-amount-wrap">
-          <p class="display-amount" id="resultAmount"></p>
+    <!-- 電卓筐体 -->
+    <div class="calc">
+      <div class="screw-bl"></div>
+      <div class="screw-br"></div>
+      <div class="calc-label">Arithmometer · Mk V</div>
+
+      <!-- Result Display -->
+      <div class="result-block" id="resultCard">
+        <div class="display-frame">
+          <p class="display-label">換金後の受取金額</p>
+          <div class="display-amount-wrap">
+            <p class="display-amount" id="resultAmount"></p>
+          </div>
+          <p class="display-label">純収支 (Net Profit)</p>
+          <div class="display-amount-wrap">
+            <p class="display-amount" id="resultProfit"></p>
+          </div>
+          <div class="display-stats" id="resultDetail"></div>
+          <button class="btn-save" id="saveBtn">結果を記録する (Save Record)</button>
         </div>
-        <div class="display-stats" id="resultDetail"></div>
       </div>
+
+      <!-- Input Panel -->
+      <div class="panel">
+        <div class="field">
+          <div class="field-indicator"></div>
+          <label for="medals">出枚数</label>
+          <div class="input-row">
+            <input type="number" id="medals" inputmode="numeric" placeholder="0" min="0">
+            <span class="unit">枚</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-indicator"></div>
+          <label for="investment">投資額 (Investment)</label>
+          <div class="input-row">
+            <input type="number" id="investment" inputmode="numeric" value="0" min="0">
+            <span class="unit">円</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-indicator"></div>
+          <label for="lending">何枚貸し</label>
+          <div class="input-row">
+            <input type="number" id="lending" inputmode="numeric" value="50" min="1">
+            <span class="unit">枚 / 1000円</span>
+          </div>
+          <p class="hint">一般：50枚　低貸し：46〜47枚</p>
+        </div>
+
+        <div class="field">
+          <div class="field-indicator"></div>
+          <label for="exchange">交換レート</label>
+          <select id="exchange">
+            <option value="equal">等価交換</option>
+            <option value="52">5.2枚交換（非等価）</option>
+            <option value="53">5.3枚交換（非等価）</option>
+            <option value="55">5.5枚交換（非等価）</option>
+            <option value="56">5.6枚交換（非等価）</option>
+            <option value="57">5.7枚交換（非等価）</option>
+            <option value="60">6.0枚交換（非等価）</option>
+            <option value="65">6.5枚交換（非等価）</option>
+            <option value="70">7.0枚交換（非等価）</option>
+          </select>
+          <p class="hint">等価 = 何枚貸しと同じレートで換金</p>
+        </div>
+
+        <div class="field">
+          <div class="field-indicator"></div>
+          <label for="fee">換金手数料</label>
+          <div class="input-row">
+            <input type="number" id="fee" inputmode="decimal" value="0" min="0" max="100" step="0.1">
+            <span class="unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-block" id="errorCard"></div>
+
+      <button class="btn-calc" id="calcBtn">計算する</button>
+
+      <div class="serial">SN · 1884 · 0002</div>
     </div>
 
-    <!-- Input Panel -->
-    <div class="panel">
-      <div class="field">
-        <div class="field-indicator"></div>
-        <label for="medals">出枚数</label>
-        <div class="input-row">
-          <input type="number" id="medals" inputmode="numeric" placeholder="0" min="0">
-          <span class="unit">枚</span>
+    <!-- 台帳開閉トグルボタン -->
+    <button class="btn-toggle-ledger" id="toggleLedgerBtn">Show Ledger</button>
+
+    <!-- 統合台帳プレート -->
+    <div class="ledger-plate">
+      <div class="screw-bl"></div>
+      <div class="screw-br"></div>
+      
+      <!-- タブボタン -->
+      <div class="ledger-tabs">
+        <button class="tab-btn active" id="tabHistoryBtn">History</button>
+        <button class="tab-btn" id="tabCalendarBtn">Calendar</button>
+      </div>
+
+      <!-- Historyコンテンツ -->
+      <div class="ledger-content active" id="historyContent">
+        <div class="plate-title">Ledger · History</div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>枚数</th>
+                <th>投資</th>
+                <th>回収</th>
+                <th>収支</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+        <div class="history-actions">
+          <button class="btn-clear" id="clearHistoryBtn">履歴クリア</button>
         </div>
       </div>
 
-      <div class="field">
-        <div class="field-indicator"></div>
-        <label for="lending">何枚貸し</label>
-        <div class="input-row">
-          <input type="number" id="lending" inputmode="numeric" value="50" min="1">
-          <span class="unit">枚 / 1000円</span>
+      <!-- Calendarコンテンツ -->
+      <div class="ledger-content" id="calendarContent">
+        <div class="plate-title">Ledger · Calendar</div>
+        <div class="calendar-header">
+          <button class="btn-cal-nav" id="prevMonthBtn">◀</button>
+          <span class="calendar-month-label" id="calendarMonthLabel"></span>
+          <button class="btn-cal-nav" id="nextMonthBtn">▶</button>
         </div>
-        <p class="hint">一般：50枚　低貸し：46〜47枚</p>
-      </div>
-
-      <div class="field">
-        <div class="field-indicator"></div>
-        <label for="exchange">交換レート</label>
-        <select id="exchange">
-          <option value="equal">等価交換</option>
-          <option value="52">5.2枚交換（非等価）</option>
-          <option value="53">5.3枚交換（非等価）</option>
-          <option value="55">5.5枚交換（非等価）</option>
-          <option value="56">5.6枚交換（非等価）</option>
-          <option value="57">5.7枚交換（非等価）</option>
-          <option value="60">6.0枚交換（非等価）</option>
-          <option value="65">6.5枚交換（非等価）</option>
-          <option value="70">7.0枚交換（非等価）</option>
-        </select>
-        <p class="hint">等価 = 何枚貸しと同じレートで換金</p>
-      </div>
-
-      <div class="field">
-        <div class="field-indicator"></div>
-        <label for="fee">換金手数料</label>
-        <div class="input-row">
-          <input type="number" id="fee" inputmode="decimal" value="0" min="0" max="100" step="0.1">
-          <span class="unit">%</span>
+        <div class="calendar-grid">
+          <div class="weekday">日</div>
+          <div class="weekday">月</div>
+          <div class="weekday">火</div>
+          <div class="weekday">水</div>
+          <div class="weekday">木</div>
+          <div class="weekday">金</div>
+          <div class="weekday">土</div>
         </div>
+        <div class="calendar-days" id="calendarDays"></div>
       </div>
     </div>
-
-    <div class="error-block" id="errorCard"></div>
-
-    <button class="btn-calc" id="calcBtn">計算する</button>
 
   </div>
 
   <script>
     document.getElementById('calcBtn').addEventListener('click', calculate);
+    document.getElementById('saveBtn').addEventListener('click', saveRecord);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+    // 台帳開閉トグル処理
+    const toggleLedgerBtn = document.getElementById('toggleLedgerBtn');
+    const ledgerPlate = document.querySelector('.ledger-plate');
+
+    toggleLedgerBtn.addEventListener('click', () => {
+      const isShown = ledgerPlate.classList.contains('show');
+      if (isShown) {
+        ledgerPlate.classList.remove('show');
+        toggleLedgerBtn.textContent = 'Show Ledger';
+      } else {
+        ledgerPlate.classList.add('show');
+        toggleLedgerBtn.textContent = 'Hide Ledger';
+      }
+    });
+    
+    // タブ切り替えロジック
+    const tabHistoryBtn = document.getElementById('tabHistoryBtn');
+    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+    const historyContent = document.getElementById('historyContent');
+    const calendarContent = document.getElementById('calendarContent');
+
+    tabHistoryBtn.addEventListener('click', () => {
+      tabHistoryBtn.classList.add('active');
+      tabCalendarBtn.classList.remove('active');
+      historyContent.classList.add('active');
+      calendarContent.classList.remove('active');
+    });
+
+    tabCalendarBtn.addEventListener('click', () => {
+      tabCalendarBtn.classList.add('active');
+      tabHistoryBtn.classList.remove('active');
+      calendarContent.classList.add('active');
+      historyContent.classList.remove('active');
+    });
+
+    // カレンダーのナビゲーション
+    document.getElementById('prevMonthBtn').addEventListener('click', () => {
+      calendarMonth--;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      }
+      renderCalendar();
+    });
+    document.getElementById('nextMonthBtn').addEventListener('click', () => {
+      calendarMonth++;
+      if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderCalendar();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadHistory();
+      renderCalendar();
+    });
+
+    let currentCalculation = null;
+    let calendarYear = new Date().getFullYear();
+    let calendarMonth = new Date().getMonth();
 
     function calculate() {
       const medalsInput = document.getElementById('medals').value;
       const medals = parseFloat(medalsInput);
+      const investmentRaw = parseFloat(document.getElementById('investment').value);
+      const investment = isNaN(investmentRaw) ? 0 : investmentRaw;
       const lending = parseFloat(document.getElementById('lending').value);
       const exchangeVal = document.getElementById('exchange').value;
       const feeRaw = parseFloat(document.getElementById('fee').value);
@@ -460,6 +1114,10 @@
         showError('出枚数は整数で入力してください');
         return;
       }
+      if (investment < 0) {
+        showError('投資額は0以上の数字を入力してください');
+        return;
+      }
       if (fee < 0 || fee > 100) {
         showError('換金手数料は0〜100%の範囲で入力してください');
         return;
@@ -474,8 +1132,9 @@
       const beforeFee = medals * (1000 / exchangeRate);
       const afterFee = Math.floor(beforeFee * (1 - fee / 100));
       const perCoin = (1000 / exchangeRate).toFixed(2);
+      const netProfit = afterFee - investment;
 
-      // 結果表示（DOM操作でXSSを防ぐ）
+      // 結果表示
       const amountEl = document.getElementById('resultAmount');
       amountEl.textContent = '';
       const currencySpan = document.createElement('span');
@@ -483,6 +1142,17 @@
       currencySpan.textContent = '¥';
       amountEl.appendChild(currencySpan);
       amountEl.appendChild(document.createTextNode(afterFee.toLocaleString()));
+
+      // 純収支の表示
+      const profitEl = document.getElementById('resultProfit');
+      profitEl.textContent = '';
+      profitEl.className = 'display-amount ' + (netProfit >= 0 ? 'profit-plus' : 'profit-minus');
+      const profitCurrencySpan = document.createElement('span');
+      profitCurrencySpan.className = 'display-currency';
+      profitCurrencySpan.textContent = '¥';
+      profitEl.appendChild(profitCurrencySpan);
+      const sign = netProfit >= 0 ? '+' : '';
+      profitEl.appendChild(document.createTextNode(sign + netProfit.toLocaleString()));
 
       const detailEl = document.getElementById('resultDetail');
       detailEl.textContent = '';
@@ -494,6 +1164,23 @@
       ].forEach(function(pair) {
         detailEl.appendChild(createStatItem(pair[0], pair[1]));
       });
+
+      // 保存用に結果を格納
+      currentCalculation = {
+        id: Date.now(),
+        date: getFormattedDate(),
+        medals: medals,
+        investment: investment,
+        afterFee: afterFee,
+        netProfit: netProfit
+      };
+
+      // 保存ボタンのリセット
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.textContent = '結果を記録する (Save Record)';
+      saveBtn.style.borderColor = 'var(--gold-dim)';
+      saveBtn.style.color = 'var(--gold-light)';
+      saveBtn.disabled = false;
 
       resultCard.classList.add('show');
     }
@@ -516,6 +1203,228 @@
       const errorCard = document.getElementById('errorCard');
       errorCard.textContent = message;
       errorCard.classList.add('show');
+    }
+
+    function getFormattedDate() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      return `${y}/${m}/${d} ${h}:${min}`;
+    }
+
+    function loadHistory() {
+      const historyJSON = localStorage.getItem('slot_calculator_history');
+      const history = historyJSON ? JSON.parse(historyJSON) : [];
+      renderHistory(history);
+    }
+
+    function renderHistory(history) {
+      const historyBody = document.getElementById('historyBody');
+      historyBody.textContent = '';
+
+      if (history.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.style.textAlign = 'center';
+        td.style.color = 'var(--text-fn)';
+        td.style.opacity = '0.5';
+        td.textContent = '記録はありません';
+        tr.appendChild(td);
+        historyBody.appendChild(tr);
+        return;
+      }
+
+      history.slice().reverse().forEach(record => {
+        const tr = document.createElement('tr');
+        const datePart = record.date.split(' ')[0].replace(/\//g, '-');
+        tr.setAttribute('data-date', datePart);
+
+        const tdDate = document.createElement('td');
+        const shortDate = record.date.substring(5);
+        tdDate.textContent = shortDate;
+        tr.appendChild(tdDate);
+
+        const tdMedals = document.createElement('td');
+        tdMedals.textContent = record.medals.toLocaleString() + '枚';
+        tr.appendChild(tdMedals);
+
+        const tdInvest = document.createElement('td');
+        tdInvest.textContent = '¥' + record.investment.toLocaleString();
+        tr.appendChild(tdInvest);
+
+        const tdReceive = document.createElement('td');
+        tdReceive.textContent = '¥' + record.afterFee.toLocaleString();
+        tr.appendChild(tdReceive);
+
+        const tdProfit = document.createElement('td');
+        tdProfit.className = 'col-profit ' + (record.netProfit >= 0 ? 'plus' : 'minus');
+        tdProfit.textContent = (record.netProfit >= 0 ? '+' : '') + record.netProfit.toLocaleString();
+        tr.appendChild(tdProfit);
+
+        const tdDel = document.createElement('td');
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn-row-del';
+        btnDel.textContent = '×';
+        btnDel.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteRecord(record.id);
+        });
+        tdDel.appendChild(btnDel);
+        tr.appendChild(tdDel);
+
+        historyBody.appendChild(tr);
+      });
+    }
+
+    function saveRecord() {
+      if (!currentCalculation) return;
+
+      const historyJSON = localStorage.getItem('slot_calculator_history');
+      const history = historyJSON ? JSON.parse(historyJSON) : [];
+
+      history.push(currentCalculation);
+      localStorage.setItem('slot_calculator_history', JSON.stringify(history));
+
+      renderHistory(history);
+      renderCalendar();
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.textContent = '記録完了 (Saved)';
+      saveBtn.style.borderColor = '#6ef089';
+      saveBtn.style.color = '#6ef089';
+      saveBtn.disabled = true;
+
+      // 保存完了時に台帳が閉じていれば自動展開する
+      if (!ledgerPlate.classList.contains('show')) {
+        ledgerPlate.classList.add('show');
+        toggleLedgerBtn.textContent = 'Hide Ledger';
+      }
+    }
+
+    function deleteRecord(id) {
+      const historyJSON = localStorage.getItem('slot_calculator_history');
+      if (!historyJSON) return;
+
+      let history = JSON.parse(historyJSON);
+      history = history.filter(record => record.id !== id);
+      localStorage.setItem('slot_calculator_history', JSON.stringify(history));
+
+      renderHistory(history);
+      renderCalendar();
+    }
+
+    function clearHistory() {
+      if (confirm('すべての履歴を削除してもよろしいですか？')) {
+        localStorage.removeItem('slot_calculator_history');
+        renderHistory([]);
+        renderCalendar();
+      }
+    }
+
+    // カレンダー用の日付別集計
+    function getDailyProfits() {
+      const historyJSON = localStorage.getItem('slot_calculator_history');
+      const history = historyJSON ? JSON.parse(historyJSON) : [];
+      const daily = {};
+      history.forEach(record => {
+        const datePart = record.date.split(' ')[0].replace(/\//g, '-');
+        if (!daily[datePart]) {
+          daily[datePart] = 0;
+        }
+        daily[datePart] += record.netProfit;
+      });
+      return daily;
+    }
+
+    // カレンダーの描画
+    function renderCalendar() {
+      const label = document.getElementById('calendarMonthLabel');
+      label.textContent = `${calendarYear}年${calendarMonth + 1}月`;
+
+      const daysContainer = document.getElementById('calendarDays');
+      daysContainer.textContent = '';
+
+      const firstDay = new Date(calendarYear, calendarMonth, 1);
+      const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
+
+      const startDayOfWeek = firstDay.getDay();
+      const numDays = lastDay.getDate();
+
+      const dailyProfits = getDailyProfits();
+      const today = new Date();
+
+      // 空白セル
+      for (let i = 0; i < startDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        daysContainer.appendChild(emptyCell);
+      }
+
+      // 日付セル
+      for (let d = 1; d <= numDays; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-day';
+
+        const isToday = today.getFullYear() === calendarYear &&
+                        today.getMonth() === calendarMonth &&
+                        today.getDate() === d;
+        if (isToday) {
+          cell.classList.add('today');
+        }
+
+        const yyyy = calendarYear;
+        const mm = String(calendarMonth + 1).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        const dateKey = `${yyyy}-${mm}-${dd}`;
+
+        const numEl = document.createElement('span');
+        numEl.className = 'calendar-day-num';
+        numEl.textContent = d;
+        cell.appendChild(numEl);
+
+        if (dailyProfits[dateKey] !== undefined) {
+          const profit = dailyProfits[dateKey];
+          const profitEl = document.createElement('span');
+          profitEl.className = 'calendar-day-profit ' + (profit >= 0 ? 'plus' : 'minus');
+
+          let displayText = '';
+          if (Math.abs(profit) >= 10000) {
+            displayText = (profit >= 0 ? '+' : '-') + (Math.abs(profit) / 10000).toFixed(1) + '万';
+          } else {
+            displayText = (profit >= 0 ? '+' : '') + profit.toLocaleString();
+          }
+          profitEl.textContent = displayText;
+          cell.appendChild(profitEl);
+
+          cell.addEventListener('click', () => {
+            highlightHistoryForDate(dateKey);
+          });
+        }
+
+        daysContainer.appendChild(cell);
+      }
+    }
+
+    // 履歴行の強調連動
+    function highlightHistoryForDate(dateKey) {
+      // カレンダーの日付クリック時は、Historyタブへ自動切り替え
+      document.getElementById('tabHistoryBtn').click();
+
+      const rows = document.querySelectorAll('#historyBody tr');
+      rows.forEach(row => row.classList.remove('highlighted'));
+
+      const targetRows = document.querySelectorAll(`#historyBody tr[data-date="${dateKey}"]`);
+      if (targetRows.length > 0) {
+        targetRows.forEach(row => row.classList.add('highlighted'));
+        // タブ切り替えアニメーション（fadeIn等）により要素が表示されるのを待ってからスクロールを実行
+        setTimeout(() => {
+          targetRows[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
     }
   </script>
 </body>
